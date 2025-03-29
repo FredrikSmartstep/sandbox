@@ -1,0 +1,6 @@
+logs/
+secret/
+*.pdf
+*.csv
+*.xls
+*.xlsx

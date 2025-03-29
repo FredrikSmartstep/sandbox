@@ -1,0 +1,15 @@
+indication
+severity
+rarity
+scientific_uncertainty observera tillförlitlighet konta osäkerhet
+he_uncertainty
+QALY_TLV
+QALY_min
+QALY_max
+three_part_outcome
+decision
+one_armed_study
+indirect
+randomiserad
+decision_makers
+comment
