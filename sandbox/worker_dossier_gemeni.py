@@ -1,14 +1,14 @@
 import os
 import ntpath
 import re
-import EventHandler
+from sandbox.EventHandler import EventHandler
 import json
 from openai import OpenAI
 import openai
 from logger_tt import getLogger
-from pydantic_models_2 import HTA_Document, HTA_Document_Preamble, Basic_PICOs, \
+from sandbox.pydantic_models_2 import HTA_Document, HTA_Document_Preamble, Basic_PICOs, \
 PICOs, Trials, References, HTA_Document_NT
-import document_splitting as ds
+import sandbox.document_splitting as ds
 import time
 import json
 import sys
@@ -20,7 +20,7 @@ from google.genai import errors as GemeniError
 import instructor
 from tenacity import retry_if_exception_type
 from google.api_core import retry
-from secret import secrets
+import secret.secrets as secrets
 log = getLogger(__name__)
 
 # import decsion file
@@ -108,7 +108,7 @@ class Worker_dossier:
             make sure you get all the requested information. 
             It is more important to get the details right than to deliver a result fast. 
             Sometimes the information needs to be summarized in order to fit the structured output. 
-            Make sure to respect the maximum string lengths (max_length) of the columns found in the Field declarations.
+            Make sure to respect the maximum string lengths (max_length), inclusing white spaces, of the columns found in the Field declarations.
             Information that you cannot find should be returned as blank ('') in the corresponding column."""
         self.chat = self.client.chats.create(
             model=gemini_model, # gemini-2.0-pro-exp-02-05 gemini-2.0-flash
@@ -252,15 +252,21 @@ class Worker_dossier:
         res = None
         
         content = [*files, message]
-        res = self.get_gemini_response(
-            content=content, 
-            model=model)
+        res_ok = False
+        retries = 0
+        while (not res_ok) and (retries<MAX_NR_OF_RETRIES):
+            res = self.get_gemini_response(
+                content=content, 
+                model=model)
+            if res:
+                res_ok = bool(res.text)
+            retries = retries+1
 
-        if not res:
+        if not res_ok:
             log.error('Unable to parse message: ' + message)
             return None 
         
-        self.quality[model.__name__.lower()] = True
+        self.quality[model.__name__.lower()] = res_ok
         return res
 
     def parse_decision_file(self, file_paths, decision):
@@ -334,7 +340,7 @@ class Worker_dossier:
                 self.dossier_nr = HTA_dump['diarie_nr']
                 self.quality['dossier'] = self.dossier_nr
                 # Check if already in DB
-                if self.dh.get_hta_with_diarie_nr_and_document_type(HTA_dump['diarie_nr'], self.doc_type):
+                if self.dh.get_hta_with_diarie_nr(HTA_dump['diarie_nr'], self.doc_type):
                     log.info('Found in DB after initial parsing')
                     res = 'found'
                     return # exits to finally
@@ -386,7 +392,7 @@ class Worker_dossier:
                     if HTA_NT:
                         HTA_dump = HTA_NT.model_dump()
                     else:
-                        HTA_dump = json.loads(res.text)
+                        HTA_dump = json.loads(res_NT.text)
                     self.dossier_nr = HTA_dump['diarie_nr']
                     self.quality['dossier'] = self.dossier_nr
                 
@@ -424,7 +430,7 @@ class Worker_dossier:
             log.info('Get the picos')
             picos = self.parse_with_gemini(
                         files = self.message_files[self.basis_document_position:], 
-                        message = "Extract the PICO:s that both the company and the agency have considered. Make sure to include all", 
+                        message = "Extract the PICO:s that the company and the agency have considered. Make sure to include all and write only one PICO per row in the table. Each combination of Population (P), Intervention (I), Comparator (C) and Outcome (O)", 
                         model = Basic_PICOs)
             log.info('PICO:s')
             log.info(picos.text)
@@ -1270,7 +1276,7 @@ class Worker_dossier:
                     assistant_id=self.assistant.id,
                     additional_messages=additional_messages,
                     additional_instructions= additional_instructions,
-                    event_handler=EventHandler.EventHandler()
+                    event_handler=EventHandler()
                 ) as stream:
                     stream.until_done()
                 # Let's make sure it finished correctly

@@ -21,7 +21,7 @@ log = getLogger(__name__)
 
 SSL_PATH = 'C:/Users/stahl-pnordics/OneDrive - SmartStep Consulting GmbH/python/ssl/DigiCertGlobalRootCA.crt.pem'
 
-SCHEMA = 'documents_db_5'
+SCHEMA = 'stage'#documents_db_5'
 
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import Insert
@@ -142,7 +142,7 @@ class DataHandlerProduction:
         df_companies = pd.read_sql_table('company',self.engine)#self.get_df('company')
         df_companies = df_companies.rename(columns={"name": "company", "id": "idproduct"})
         df_product = pd.read_sql_table('product',self.engine)
-        df_product = df_product.rename(columns={"name": "product"})#.drop(columns={'ATC','idcompany','idactive_drug'})
+        df_product = df_product.rename(columns={"name": "product", "id": "idcompany"})#.drop(columns={'ATC','idcompany','idactive_drug'})
         df = df.merge(df_companies, on='company', how='left')
         df = df.merge(df_product, on='product', how='inner') # OBS inner
         df = df.drop(columns=['company','product'])

@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 import re
 
-import openAI_response as oa
-from openAI_response import get_response
+import sandbox.openAI_response as oa
+from sandbox.openAI_response import get_response
 from logger_tt import getLogger
 
 

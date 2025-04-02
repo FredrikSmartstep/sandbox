@@ -270,8 +270,6 @@ def upsert_NT():
 if __name__ == '__main__':    
     # initialize scraper
 
-    # Initialize db_worker
-
     #upsert_ATC()
     #----------------
     # Get product classification (hosptial or basic drug, Med Dev) and med devices

@@ -21,8 +21,8 @@ def find_toc_page(file_path, toc_keywords):
 
     # Search for the TOC keyword in the document
     for page_number in range(len(doc)):
-        page_text = doc[page_number].get_text("text")
-        for kw in toc_keywords:
+        page_text = doc[page_number].get_text("text").lower()
+        for kw in [k.lower() for k in toc_keywords]:
             if kw in page_text:
                 return page_number
 
@@ -100,7 +100,7 @@ def ensure_directory_exists(directory_path):
         os.makedirs(directory_path)
 
 
-def split_preamble_and_chapters_safe(file_path, output_dir, toc_keywords=["Innehåll","Content"]):
+def split_preamble_and_chapters_safe(file_path, output_dir, toc_keywords=["Innehåll","Content","Contents"]):
     """
     Splits the PDF into a preamble and chapter files, ensuring directories exist.
 

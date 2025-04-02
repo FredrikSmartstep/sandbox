@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, constr, conlist, field_validator, model_validator, ValidationError, ValidatorFunctionWrapHandler
-import sqlalchemy_models360 as sqlal_models
+import sandbox.sqlalchemy_models360 as sqlal_models
 from enum import Enum
 from typing import Any, Literal, Optional
 import re
@@ -114,8 +114,8 @@ class Costs(OurBaseModel):
         orm_model = sqlal_models.Costs
 
 class Outcome_Measure(OurBaseModel):
-    name: Optional[str] = Field(default=None, description="The name of the variable", max_length=100)
-    units: Optional[str] = Field(default=None, description="The quantitative units of the variable", max_length=45)
+    name: Optional[str] = Field(default=None, description="The name of the variable. Only one variable. Separate into separate rows in the table if more than one.", max_length=100)
+    units: Optional[str] = Field(default=None, description="The quantitative unit of the variable", max_length=45)
 
     class Meta:
         orm_model = sqlal_models.Outcome_Measure
@@ -196,7 +196,7 @@ class Demographics(OurBaseModel):
     gender: Literal['Male', 'Female', 'All'] = Field(description="If no information is provided, 'All' is assumed.")
 
 class Population(OurBaseModel):
-    description: str = Field(description="Description of the identified population covering the associated indication", max_length=500)  
+    description: str = Field(description="Description of the identified population covering the associated indication. This description should be short and information covered by the other columns in this table does not have to be described here as well.", max_length=500)  
     demographics: Demographics = Field(description="The demographics of this population.")
     ethnic_considerations: Optional[str] = Field(description="Description of ethnic aspects, if relevant.", max_length=200)
     genetic_factors: Optional[str] = Field(description="Any genetic factors that characterize the population.", max_length=200)

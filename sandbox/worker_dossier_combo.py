@@ -2,12 +2,12 @@ import os
 import ntpath
 import re
 import openai
-import EventHandler
+from sandbox.EventHandler import EventHandler
 import json
 from logger_tt import getLogger
-from pydantic_models_rev import HTA_Document, HTA_Document_Basis, Team, PICOs_comp, PICOs_ag, Analysis_List_Comp, Analysis_List_Ag, \
+from sandbox.pydantic_models_rev import HTA_Document, HTA_Document_Basis, Team, PICOs_comp, PICOs_ag, Analysis_List_Comp, Analysis_List_Ag, \
     Trials, References, HTA_Document_Extend, HTA_Document_NT_Extend, Panel2, MissingDataException, HTA_Summary, Indications_and_Population_Cohorts
-import document_splitting as ds
+import sandbox.document_splitting as ds
 from typing import Iterable
 import time
 import json
@@ -17,7 +17,7 @@ import sys
 import tempfile
 from pypdf import PdfReader
 import pandas as pd
-from secret import secrets
+import secret.secrets as secrets
 
 class FoundDataException(Exception):
     pass
@@ -1477,7 +1477,7 @@ class Worker_dossier:
                     assistant_id=assistant.id,
                     additional_messages=additional_messages,
                     additional_instructions= additional_instructions,
-                    event_handler=EventHandler.EventHandler()
+                    event_handler=EventHandler()
                 ) as stream:
                     stream.until_done()
                 # Let's make sure it finished correctly

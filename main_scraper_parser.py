@@ -2,30 +2,30 @@
 from datetime import datetime
 from sqlalchemy import inspect
 #import worker_dossier as wd
-import worker_dossier_gemeni as wd_gem
-import worker_dossier_combo as wd
-import worker_dossier_merger as wd_mer
+import sandbox.worker_dossier_gemeni as wd_gem
+import sandbox.worker_dossier_combo as wd
+import sandbox.worker_dossier_merger as wd_mer
 import sys
 import json
 import re
 import pandas as pd
 from openai import OpenAI
 from logger_tt import getLogger, setup_logging
-from sqlalchemy_models360 import HTA_Document, HTA_Document_Basis, PICO, Analysis, Population, Outcome_Measure
-import sqlalchemy_models360_basis as m
-from parse_decision_file import parse_decision_file
-import scraping_tools as st
-from data_cleaner import clean_up
+from sandbox.sqlalchemy_models360 import HTA_Document, HTA_Document_Basis, PICO, Analysis, Population, Outcome_Measure
+import sandbox.sqlalchemy_models360_basis as m
+from sandbox.parse_decision_file import parse_decision_file
+import sandbox.scraping_tools as st
+from sandbox.data_cleaner import clean_up
 import queue
 from threading import Thread, Event
 from multiprocessing.pool import ThreadPool
 import csv
-from data_handler_new import DataHandlerProduction, upser
+from sandbox.data_handler_new import DataHandlerProduction, upser
 import tempfile
 from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.orm import Session
-
-from secret import secrets
+ 
+import secret.secrets as secrets
 
 client = OpenAI(
     api_key=secrets.open_ai_key, 
@@ -43,8 +43,8 @@ DOCUMENT_TYPE = 'nt-basis'#'dossier' #'decision' # basis
 DUMMY = False
 MULTI_THREADING = False
 
-pool_size=3 #12 trying with 4 to see if that is enough to get a stable request rate at about 5
-pool_size_inserter=3#4
+pool_size=8 #12 trying with 4 to see if that is enough to get a stable request rate at about 5
+pool_size_inserter=4#4
 #--------------------------
 
 unparseable = []
@@ -185,7 +185,7 @@ def check_if_in_db(tmpdirname, prod_name):
             diarie_match = re.search('\d{1,4}[\/\,] ?20[0-2]\d', str(meta.keywords)) # at least one had a comma instead of a slash. also white space after maz occur '\d{1,4}[\/\,] ?20[0-2]\d'
             log.info('Extracted metadata for '+ prod_name + ' file nr ' + str(k))
             if diarie_match:
-                if dh.get_hta_with_diarie_nr_and_document_type(diarie_match[0], DOCUMENT_TYPE):
+                if dh.get_hta_with_diarie_nr(diarie_match[0]): # dh.get_hta_with_diarie_nr_and_document_type(diarie_match[0], DOCUMENT_TYPE):
                     log.info('Found in db')
                     return True
     log.info('Not found in db')
@@ -199,7 +199,9 @@ def get_and_parse(link_data, parsing_class='combo'):
         pass
     else:
         # "gemini-2.0-flash-thinking-exp-01-21" json mode not enabled
-        parser = wd_gem.Worker_dossier(client, doc_type=DOCUMENT_TYPE, gem_model="gemini-2.0-flash", dh=DataHandlerProduction(), alternate=True)
+        # before: gemini-2.0-pro-exp-02-05
+        # New model: gemini-2.5-pro-exp-03-25
+        parser = wd_gem.Worker_dossier(client, doc_type=DOCUMENT_TYPE, gem_model="gemini-2.5-pro-exp-03-25", dh=DataHandlerProduction(), alternate=False)
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         log.info('Getting the files')
@@ -556,9 +558,9 @@ def run_sequential_parsing(link_data, parsing_class, combo_data = None, vs_combo
 
 def create_links_queue():
     if DOCUMENT_TYPE=='dossier':
-        FILENAME = './links.json'
+        FILENAME = SAVE_PATH + 'links.json'
     else:
-        FILENAME = './nt_links.json'
+        FILENAME = SAVE_PATH + 'nt_links.json'
 
     if RUN_BASICS:
         if DOCUMENT_TYPE=='dossier':

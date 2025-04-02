@@ -11,7 +11,7 @@ from openai import OpenAI
 import logging
 logger = logging.getLogger(__name__)
 
-from scraping_methods import get_text_3, get_text_2, get_date, get_line, get_next_line, \
+from sandbox.scraping_methods import get_text_3, get_text_2, get_date, get_line, get_next_line, \
 get_clean_block_list, get_drug_from_table, get_info_from_table, extract_sentences_with_word, get_next, get_blocks_in_between
 
 def parse_decision_file(file, product_name):

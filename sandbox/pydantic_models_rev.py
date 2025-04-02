@@ -1,6 +1,6 @@
 from datetime import date
 from pydantic import BaseModel, ConfigDict, Field, constr, conlist, field_validator, model_validator
-import sqlalchemy_models360 as sqlal_models
+import sandbox.sqlalchemy_models360 as sqlal_models
 from enum import Enum
 from typing import Any, Literal, Optional
 import re

@@ -1,0 +1,11 @@
+mysql:
+   
+ host: 'smartstepnordics-mysql8.mysql.database.azure.com'
+   
+ port: '3306'
+   
+ user: 'smartstepnordics_adm'
+   
+ password: 'Z8cIY[I90++moWt[bD,k'
+   
+ db: 'document_db'

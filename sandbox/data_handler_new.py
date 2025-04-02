@@ -12,7 +12,7 @@ from sqlalchemy.sql import text
 from sqlalchemy import UniqueConstraint, event, inspect
 from sqlalchemy import exc
 from sqlalchemy.dialects.mysql import insert
-from sqlalchemy_models360 import Demographics
+from sandbox.sqlalchemy_models360 import Demographics
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from datetime import timedelta, date, datetime
@@ -21,7 +21,7 @@ import numpy as np
 import time
 import logging
 log = logging.getLogger(__name__)
-from secret import secrets
+import secret.secrets as secrets
 
 SSL_PATH = 'C:/Users/stahl-pnordics/OneDrive - SmartStep Consulting GmbH/python/ssl/DigiCertGlobalRootCA.crt.pem'
 
@@ -132,7 +132,7 @@ class DataHandlerProduction:
                     port = '3306'#cfg['mysql']['port']
                     user = 'smartstepnordics_adm'#cfg['mysql']['user']
                     pw = secrets.mysql_pwd
-                    self.dbschema = 'documents_db_4'#cfg['mysql']['db']
+                    self.dbschema = 'documents_db_5'#cfg['mysql']['db']
 
                     temp = r'mysql+pymysql://' + user + ':' + pw + '@' + host + ':' + str(port) + '/' + self.dbschema + "?charset=utf8mb4"
                     connect_text = "### MYSQL CONNECTION user=%s host=%s schema=%s" % (user, host, self.dbschema)
@@ -576,6 +576,15 @@ class DataHandlerProduction:
     def get_hta_with_diarie_nr_and_document_type(self, diarie_nr, doc_type):
         query = text('SELECT id from hta_document WHERE diarie_nr=:p1 AND document_type=:p2')
         result = self.query_database(query, par={'p1': diarie_nr, 'p2': doc_type})
+        result = result.fetchone()
+        if result is not None:
+            return result[0]
+        else:
+            return None
+        
+    def get_hta_with_diarie_nr(self, diarie_nr):
+        query = text('SELECT id from hta_document WHERE diarie_nr=:p1')
+        result = self.query_database(query, par={'p1': diarie_nr})
         result = result.fetchone()
         if result is not None:
             return result[0]

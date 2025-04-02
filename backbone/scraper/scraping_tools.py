@@ -120,8 +120,16 @@ def get_nt_assessment_links():
     root_str = ET.tostring(root, encoding="unicode")
     # get the links to the evaluation pages 
     raw_links = re.findall('https.*arkiv-avslutade-halso.*html', root_str)
+
+    df_rec = get_NT_deals_df()
+    prods = list(df_rec['product'])
+    raw_links_2 = [[x for x in re.findall('https.*' + li + '.*html', root_str, flags=re.I)] for li in prods]
+    raw_links_2 = [x for y in raw_links_2 for x in y]
+    resulting_list = list(raw_links)
+    resulting_list.extend(x for x in raw_links_2 if x not in raw_links)
+
     links = []
-    for link in raw_links:
+    for link in resulting_list:
         m = re.match('\d{4}-\d{2}-\d{2}', link)
         if m:
             datum = m[0]
@@ -186,7 +194,8 @@ def get_NT_deals_df():
     json.loads(m[0])
     deals = json.loads(m[0])
     df_deals = pd.DataFrame(deals)
-    df_deals = df_deals.rename(columns={'atc_code':'ATC', 'deal_part':'company', 'deal_start':'start', 'deal_end': 'end', 'longer_option_to': 'option'})
+    df_deals = df_deals.rename(columns={'atc_code':'ATC', 'deal_part':'company', 'recipe_or_requisition':'recipe_type', 'deal_start':'start', 'deal_end': 'end', 'longer_option_to': 'option'})
+    df_deals = df_deals.drop(columns={'id','name', 'url','substance'})
     return df_deals
 
 

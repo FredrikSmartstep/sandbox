@@ -2,11 +2,11 @@ import os
 import ntpath
 import re
 import openai
-import EventHandler
+from sandbox.EventHandler import EventHandler
 import json
 from logger_tt import getLogger
-from pydantic_models_2 import HTA_Document
-import document_splitting as ds
+from sandbox.pydantic_models_2 import HTA_Document
+import sandbox.document_splitting as ds
 from typing import Iterable
 import time
 import json
@@ -121,7 +121,7 @@ class Worker_dossier:
                     assistant_id=assistant.id,
                     additional_messages=additional_messages,
                     additional_instructions= additional_instructions,
-                    event_handler=EventHandler.EventHandler()
+                    event_handler=EventHandler()
                 ) as stream:
                     stream.until_done()
                 # Let's make sure it finished correctly

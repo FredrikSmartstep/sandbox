@@ -9,7 +9,7 @@ from logger_tt import getLogger
 log = getLogger(__name__)
 
 
-client = OpenAI(api_key=secrets.secrets.open_ai_key, timeout=60.0)
+client = OpenAI(api_key=secrets.open_ai_key, timeout=60.0)
 #https://chatgpt.com/g/g-xjGRu8osa-hta-agent
 def get_response(messages): 
 # "Present a summary of the products of {}, including medical indications (also ICD code), product names and development stage (if appropriate). List all products and medical indications. Specifically investigate their website for info: {}".format(name, url)
